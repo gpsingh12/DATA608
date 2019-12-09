@@ -54,12 +54,12 @@ layout_map = dict(
     title='FDNY OPEN VIOLATIONS',
     mapbox=dict(
         accesstoken=mapbox_access_token,
-        style="light",
+        style="satellite-streets",
         center=dict(
             lon=-73.91251,
             lat=40.7342
         ),
-        zoom=12,
+        zoom=9,
     )
 )
 
@@ -74,22 +74,40 @@ app.layout = html.Div([
         value='BX',
         style={'width':'50%'}
     ),
-    html.Div(id='display-value'),
+    html.Div([
     dcc.Graph( id="output-graph"),
-        ])
+        ], style={'width': '48%', 'display': 'inline-block'}),
+    html.Div([
+        dcc.Graph(id="bar-graph"),
+        ],style={'width': '48%', 'align': 'right', 'display': 'inline-block'})
+])
 
 @app.callback(dash.dependencies.Output('output-graph', 'figure'),
               [dash.dependencies.Input('dropdown', 'value')])
 
 
 def update_value(value):
+    test = map_data[map_data['BOROUGH']==value]
 
     return({'data': [
-        {'lat': map_data.LATITUDE, 'lon': map_data.LONGITUDE, 'type': 'scattermapbox'},
+        {'lat': test.LATITUDE, 'lon': test.LONGITUDE, 'type': 'scattermapbox',
+        'hoverinfo': 'text',
+        'hovertext': [["ACCT_OWNER: {} <br>ACCT_NUM: {} <br>".format(i,j,)]
+                                for i,j in zip(test['ACCT_OWNER'], test['ACCT_NUM'])]},
+        
        ],
         'layout': layout_map
         }
     )
+
+
+
+@app.callback(dash.dependencies.Output('bar-graph', 'figure'),
+              [dash.dependencies.Input('dropdown', 'value')])
+
+
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=False)
