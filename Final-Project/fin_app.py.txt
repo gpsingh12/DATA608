@@ -52,7 +52,7 @@ layout_map = dict(
     ),
     hovermode="closest",
     plot_bgcolor='#fffcfc',
-    paper_bgcolor='#fffcfc',
+    paper_bgcolor='#red',
     legend=dict(font=dict(size=10), orientation='h'),
     title='FDNY OPEN VIOLATIONS',
     mapbox=dict(
