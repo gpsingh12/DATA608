@@ -15,17 +15,20 @@ app.title = 'FDNY VIOLATIONS'
 
 
 
+
 # API keys and datasets
 mapbox_access_token = 'pk.eyJ1IjoiZ3BzaW5naDEyIiwiYSI6ImNrMzNhanQ2ZjBqODMzaW1tbHRxNHBqa20ifQ.ewLqQWO3g2TNM-8NpFhcxw'
 df = pd.read_csv("https://raw.githubusercontent.com/gpsingh12/DATA608/master/Final-Project/fdny_vio.csv")
 
 # Selecting only required columns
-df1 = df[['BOROUGH', 'LATITUDE', 'LONGITUDE', 'ACCT_NUM', 'ACCT_OWNER']]
+df1 = df[['BOROUGH', 'LATITUDE', 'LONGITUDE', 'ACCT_NUM', 'ACCT_OWNER', 'POSTCODE']]
+map_data=df1.dropna()
+bor = pd.DataFrame(map_data.groupby(['BOROUGH', 'POSTCODE']).size().sort_values(ascending=False).reset_index(name='Violations'))
 
 
 #drop null values
 
-map_data=df1.dropna()
+
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -76,10 +79,10 @@ app.layout = html.Div([
     ),
     html.Div([
     dcc.Graph( id="output-graph"),
-        ], style={'width': '48%', 'display': 'inline-block'}),
+        ], style={'width': '60%', 'display': 'inline-block'}),
     html.Div([
         dcc.Graph(id="bar-graph"),
-        ],style={'width': '48%', 'align': 'right', 'display': 'inline-block'})
+        ],style={'width': '40%', 'align': 'right', 'display': 'inline-block'})
 ])
 
 @app.callback(dash.dependencies.Output('output-graph', 'figure'),
@@ -101,11 +104,19 @@ def update_value(value):
     )
 
 
-
 @app.callback(dash.dependencies.Output('bar-graph', 'figure'),
               [dash.dependencies.Input('dropdown', 'value')])
 
-
+def update_graph_a(value):
+    # prepare figure_a from value
+    test1 =bor[bor['BOROUGH']==value]
+    test1 = test1.nlargest(20,'Violations')
+    return({'data': [
+        {'x': test1.POSTCODE, 'y': test1.Violations, 'type': 'bar'}
+        ],
+        'layout': layout_map
+        }
+    )
 
 
 
